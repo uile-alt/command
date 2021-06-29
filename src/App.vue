@@ -2,7 +2,7 @@
   <nav>
     <h1>
       <img alt="logo" src="./assets/logo.png" />
-      <span>Command</span>
+      <span>{{ hi }}</span>
     </h1>
     <div class="hint">
       <svg
@@ -28,10 +28,54 @@
       </svg>
     </div>
   </nav>
+  <main>
+    <div class="handle" :style="`${startWidth}+px`" ref="root">
+      <div class="content">hi</div>
+      <div
+        class="separator"
+        @mousedown="startDrag"
+        @mousemove="onDrag"
+        @mouseup="stopDrag"
+      >
+        <i></i><i></i>
+      </div>
+    </div>
+    <div class="desktop">
+      <div class="content">Welcome</div>
+    </div>
+  </main>
 </template>
 
 <script setup lang="ts" >
-// import HelloWorld from './components/HelloWorld.vue'
+import { ref, onMounted } from "vue";
+const root = ref<number>(1);
+const hi = "Command";
+let startX: number, startWidth: number;
+onMounted(() => {
+  console.dir(root.value);
+});
+
+startWidth =
+  Number(localStorage.getItem("handle_width")) || getHandleDivWidth();
+
+function getHandleDivWidth(): number {
+  return root.value?.clientWidth;
+  //   return 100;
+}
+const startDrag = (e: MouseEvent): void => {
+  startX = e.clientX;
+  startWidth = getHandleDivWidth();
+  console.log("11111");
+};
+const onDrag = (e: MouseEvent) => {
+  let newWidth = startWidth + e.clientX - startX;
+  startWidth = newWidth;
+  console.log("22222");
+};
+const stopDrag = (e: MouseEvent): void => {
+  localStorage.setItem("handle_width", String(getHandleDivWidth()));
+  console.log("33333");
+};
 </script>
 
 <style lang="scss">
@@ -41,13 +85,13 @@ nav {
   display: flex;
   padding: 0 1em;
   justify-content: space-between;
+  min-height: 10vh;
 }
 nav img {
   width: 80px;
 }
 h1,
 .hint {
-  //   display: inline;
   position: relative;
 }
 span,
@@ -58,5 +102,43 @@ svg {
 }
 svg {
   right: 0;
+}
+main {
+  display: flex;
+  min-height: 90vh;
+}
+
+.handle {
+  background-color: #eee;
+  position: relative;
+}
+.desktop {
+  flex: 1;
+}
+.content {
+  padding: 20px;
+}
+.handle .separator {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 14px;
+  height: 100%;
+  background-color: white;
+  box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.35);
+  cursor: col-resize;
+}
+.handle .separator i {
+  display: inline-block;
+  height: 14px;
+  width: 1px;
+  background-color: #e9e9e9;
+  margin: 0 1px;
+}
+.handle .content {
+  padding-right: 34px;
 }
 </style>
