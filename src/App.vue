@@ -2,7 +2,7 @@
   <nav>
     <h1>
       <img alt="logo" src="./assets/logo.png" />
-      <span>{{ hi }}</span>
+      <span>Command</span>
     </h1>
     <div class="hint">
       <svg
@@ -29,16 +29,9 @@
     </div>
   </nav>
   <main>
-    <div class="handle" :style="`${startWidth}+px`" ref="root">
+    <div class="handle" :style="{ width: endWidth + 'px' }" ref="root">
       <div class="content">hi</div>
-      <div
-        class="separator"
-        @mousedown="startDrag"
-        @mousemove="onDrag"
-        @mouseup="stopDrag"
-      >
-        <i></i><i></i>
-      </div>
+      <div class="separator" @mousedown="startDrag"><i></i><i></i></div>
     </div>
     <div class="desktop">
       <div class="content">Welcome</div>
@@ -48,33 +41,46 @@
 
 <script setup lang="ts" >
 import { ref, onMounted } from "vue";
-const root = ref<number>(1);
-const hi = "Command";
+const root = ref(" ");
 let startX: number, startWidth: number;
-onMounted(() => {
-  console.dir(root.value);
-});
 
+const getHandleDivWidth = () => {
+  // @ts-ignore
+  return root.value.clientWidth;
+};
 startWidth =
   Number(localStorage.getItem("handle_width")) || getHandleDivWidth();
+let endWidth = ref<number>(startWidth);
 
-function getHandleDivWidth(): number {
-  return root.value?.clientWidth;
-  //   return 100;
-}
+onMounted(() => {
+  //@ts-ignore
+  console.dir(root.value.clientWidth);
+  console.log(root.value);
+});
+
 const startDrag = (e: MouseEvent): void => {
+  e.preventDefault();
   startX = e.clientX;
   startWidth = getHandleDivWidth();
-  console.log("11111");
+
+  document.onmousemove = (e) => {
+    onDrag(e);
+  };
+  document.onmouseup = (e) => {
+    stopDrag(e);
+  };
 };
 const onDrag = (e: MouseEvent) => {
   let newWidth = startWidth + e.clientX - startX;
-  startWidth = newWidth;
-  console.log("22222");
+  endWidth.value = newWidth;
 };
 const stopDrag = (e: MouseEvent): void => {
+  console.log("3333");
+
   localStorage.setItem("handle_width", String(getHandleDivWidth()));
-  console.log("33333");
+
+  document.onmousemove = null;
+  document.onmouseup = null;
 };
 </script>
 
@@ -86,10 +92,11 @@ nav {
   padding: 0 1em;
   justify-content: space-between;
   min-height: 10vh;
+  img {
+    width: 80px;
+  }
 }
-nav img {
-  width: 80px;
-}
+
 h1,
 .hint {
   position: relative;
@@ -111,6 +118,7 @@ main {
 .handle {
   background-color: #eee;
   position: relative;
+  min-width: 200px;
 }
 .desktop {
   flex: 1;
